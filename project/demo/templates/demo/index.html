@@ -1,0 +1,18 @@
+{% extends "nango/base.html" %}
+<div />
+{% block body %} {% if customers %}
+<ul>
+  {% for customer in customers %}
+  <li>
+    <a href="{% url 'demo:edit' customer.id %}">{{ customer.name }}</a>
+    <a href="{% url 'demo:delete' customer.id %}">🗑️</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No customers are available.</p>
+{% endif %}
+<p>
+  <a href="{% url 'demo:new' %}">new customer</a>
+</p>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href={% static 'nango/ws.css' %} type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %} template {% endblock %}</title>
+<script src={% static 'nango/ws.js' %} defer></script>
+
+{% block head %}
+{% endblock %}
+<body>
+    {% block body %}
+    (base template)
+    {% endblock %}
+</body>
+</html>

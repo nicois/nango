@@ -1,0 +1,5 @@
+channels
+channels_redis
+daphne
+django
+django-debug-toolbar

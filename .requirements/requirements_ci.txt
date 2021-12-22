@@ -1,0 +1,8 @@
+-rrequirements.txt
+django-stubs
+mypy
+beautifulsoup4
+pytest
+pytest-django
+pytest-xdist
+snoop

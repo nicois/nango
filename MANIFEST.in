@@ -1,0 +1,3 @@
+prune project/demo
+prune project/project
+prune .requirements

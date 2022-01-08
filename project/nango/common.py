@@ -1,4 +1,5 @@
 import json
+import logging
 from types import MethodType
 from typing import Any
 
@@ -7,6 +8,7 @@ from django.db.models import Model
 from django.utils.html import format_html
 
 DELIMITER = "."
+LOGGER = logging.getLogger(__file__)
 
 
 def encode_pk(pk: Any) -> str:
@@ -58,9 +60,14 @@ def set_original_form_values_on_instance(form, *, instance=None):
         )
         if field_key in form.data:
             original_value = form.data[field_key]
-            (instance or form.instance)._original_form_values[
-                field_name
-            ] = original_value
+            try:
+                (instance or form.instance)._original_form_values[
+                    field_name
+                ] = original_value
+            except AttributeError:
+                model = (instance or form.instance).__class__
+                LOGGER.error(f"Model {model} is missing the nango mixin.")
+                raise
 
 
 def patch_widgets(form):

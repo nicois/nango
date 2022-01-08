@@ -1,7 +1,7 @@
 # Create your models here.
 from django.db import models
-from nango.models import LockableMixin
-from nango.models import TrackableMixin
+from nango.db.models import LockableMixin
+from nango.db.models import TrackableMixin
 
 
 class Company(TrackableMixin, LockableMixin, models.Model):

@@ -2,7 +2,7 @@
 from typing import List
 from typing import Tuple
 
-import nango.models
+import nango.db.models
 from django.db import migrations
 from django.db import models
 
@@ -29,6 +29,6 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=100)),
                 ("notes", models.TextField()),
             ],
-            bases=(nango.models.LockableMixin, models.Model),
+            bases=(nango.db.models.LockableMixin, models.Model),
         ),
     ]

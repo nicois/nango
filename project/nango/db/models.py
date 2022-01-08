@@ -1,17 +1,24 @@
 import logging
-from pprint import pprint
+from inspect import isclass
 from typing import Any
 from typing import Dict
 from typing import List
 
 from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+
+try:
+    from channels.layers import get_channel_layer
+except ModuleNotFoundError:
+    get_channel_layer = None
+
 from django.core.exceptions import ValidationError
+
+from django.db import models
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
-from .common import DELIMITER
-from .common import serialise_model_attr
+from ..common import DELIMITER
+from ..common import serialise_model_attr
 
 LOGGER = logging.getLogger(__file__)
 
@@ -30,37 +37,33 @@ class TrackableMixin:
         abstract = True
 
     def save(self, *args, **kw):
-        print(f"Saving {self}")
         result = super().save(*args, **kw)
-        channel_layer = get_channel_layer()
-        model_identifier = DELIMITER.join(
-            [self._meta.app_label, self._meta.model_name, str(self.pk)]
-        )
-        message = dict(
-            type="saved",
-            message=dict(
-                app=self._meta.app_label, model=self._meta.model_name, pk=self.pk
-            ),
-        )
-        print(f"Sending {message!r} to {model_identifier!r}")
+        if get_channel_layer:
+            channel_layer = get_channel_layer()
+            model_identifier = DELIMITER.join(
+                [self._meta.app_label, self._meta.model_name, str(self.pk)]
+            )
+            message = dict(
+                type="saved",
+                message=dict(
+                    app=self._meta.app_label, model=self._meta.model_name, pk=self.pk
+                ),
+            )
 
-        def on_commit() -> None:
-            async_to_sync(channel_layer.group_send)(model_identifier, message)
+            def on_commit() -> None:
+                async_to_sync(channel_layer.group_send)(model_identifier, message)
 
-        transaction.on_commit(on_commit)
+            transaction.on_commit(on_commit)
         return result
 
     def clean(self, *args, **kw):
-        print(f"Cleaning {self} with {self._original_form_values=}")
-        if self._original_form_values:
+        # If there is no pkey yet, this is a new object, so can't conflict
+        if self._original_form_values and self.pk:
             errors: List[ValidationError] = []
             copy = self.__class__.objects.select_for_update().get(pk=self.pk)
             for attr, expected_value in self._original_form_values.items():
                 current_stored_value = serialise_model_attr(copy, attr)
                 if current_stored_value != expected_value:
-                    pprint(current_stored_value)
-                    pprint(expected_value)
-                    pprint(self._original_form_values)
                     errors.append(
                         ValidationError(
                             _(
@@ -98,3 +101,20 @@ class LockableMixin:
 
     class Meta:
         abstract = True
+
+
+class Model(TrackableMixin, models.Model):
+    class Meta:
+        abstract = True
+
+
+def __getattr__(name: str) -> Any:
+    original = getattr(models, name)
+    if isclass(original):
+        if issubclass(original, models.Model) and not issubclass(
+            original, TrackableMixin
+        ):
+            return type(original.__name__, (TrackableMixin, original), {})
+    return original
+
+    # raise AttributeError(f"module {__name__} has no attribute {name}")

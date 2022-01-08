@@ -26,7 +26,6 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         self.fields_for_instance: Dict[MessageType, Dict[str, Any]] = defaultdict(dict)
 
     async def connect(self) -> None:
-        LOGGER.info("connected")
         await self.accept()
 
     def _retrieve_instance_values(self, app, model, pk, attrs):
@@ -35,7 +34,6 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         return {attr: getattr(instance, attr) for attr in attrs}
 
     async def saved(self, info) -> None:
-        print("saved")
         message = info["message"]
         app = message["app"]
         model = message["model"]
@@ -44,10 +42,8 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         instance = await sync_to_async(self._retrieve_instance_values)(
             app=app, model=model, pk=pkey, attrs=fields
         )
-        print(f"{fields=} {instance=}")
         for attr, original_value in fields.items():
             new_value = serialise_value(value=instance[attr])
-            print(f"{attr=} {original_value=} {new_value=}")
             if original_value != new_value:
                 message = dict(
                     message=dict(
@@ -59,13 +55,11 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
                         new_value=new_value,
                     )
                 )
-                print(message)
                 await self.send(text_data=json.dumps(message))
                 fields[attr] = new_value
 
     async def receive(self, text_data: bytes) -> None:
         text_data_json = json.loads(text_data)
-        LOGGER.error(f"{text_data_json=!r}")
         for instance_ref in text_data_json["register"]:
             app_label = instance_ref["appLabel"]
             model = instance_ref["model"]
@@ -84,10 +78,8 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
             await self.saved(
                 info=dict(message=dict(app=app_label, model=model, pk=pkey))
             )
-            print(f"{self._my_groups=}")
 
     async def disconnect(self, close_code: Any) -> None:
-        LOGGER.info("disconnected")
         for my_group in self._my_groups:
             await self.channel_layer.group_discard(
                 group=my_group, channel=self.channel_name

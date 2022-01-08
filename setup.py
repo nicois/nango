@@ -5,7 +5,16 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+
+def myversion():
+    def clean_scheme(version):
+        return environ["VERSION_STRING"]
+
+    return {"local_scheme": clean_scheme}
+
+
 setuptools.setup(
+    use_scm_version=False,
     name="nango",
     version=environ.get("VERSION_STRING", "dev"),
     author="Nick Farrell",
@@ -23,6 +32,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir={"": "project"},
-    packages=setuptools.find_packages(where="src"),
+    packages=setuptools.find_packages(where="project"),
     python_requires=">=3.8",
+    # package_data={"nango": ["*.html", "*.css", "*.js"]},
+    include_package_data=True,
 )

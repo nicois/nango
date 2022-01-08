@@ -5,7 +5,7 @@ from typing import Any
 from django.views.generic import edit
 from nango.common import patch_widgets
 from nango.common import set_original_form_values_on_instance
-from nango.models import TrackableMixin
+from nango.db.models import TrackableMixin
 
 """
 idea: in the template, if certain fields are selected to be live-tracked,
@@ -26,7 +26,6 @@ mymodel = get_model('some_app', 'SomeModel')
 
 class Mixin:
     def get_form(self):
-        print(f"{self=} get_form")
         form = super().get_form()
         if not isinstance(form.instance, TrackableMixin):
             return form
@@ -47,7 +46,6 @@ def __getattr__(name: str) -> Any:
     original_class = getattr(edit, name)
     if not isclass(original_class):
         raise AttributeError(f"module {__name__} has no attribute {name}")
-    print(f"making nango variant of {name=}")
     return type(
         original_class.__name__,
         (

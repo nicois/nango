@@ -4,6 +4,7 @@ set -x
 
 VERSION_STRING=$(git describe --always --tags --dirty)
 YMD="$(date +%Y.%m.%d)"
+SUFFIX=".8"
 
 
 # Get the previous tag, if possible
@@ -27,13 +28,13 @@ if [[ -f "pyproject.toml" ]] ; then
         VERSION_STRING="$VERSION_TAG" chronic python -m build
         if [[ -f ~/.pypirc ]] ; then
             echo "Uploading ${VERSION_TAG} to prod pypi"
-            xpython3 -m twine upload --repository pypi dist/*
+            python3 -m twine upload --repository pypi dist/*
         fi
     elif [[ "$VERSION_STRING" != *-dirty ]] ; then
-        VERSION_STRING="$YMD" chronic python -m build
+        VERSION_STRING="${YMD}${SUFFIX}" chronic python -m build
         if [[ -f ~/.pypirc ]] ; then
             echo "Uploading ${YMD} to test pypi"
-            xpython3 -m twine upload --repository testpypi dist/*
+            python3 -m twine upload --repository testpypi dist/*
         fi
     else
         VERSION_STRING="$YMD" chronic python -m build

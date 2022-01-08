@@ -1,2 +1,4 @@
 .venv
 db.sqlite3
+dist/
+project/nango.egg-info/

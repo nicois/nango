@@ -1,21 +1,20 @@
 # Create your models here.
-from django.db import models
-from nango.db.models import LockableMixin
-from nango.db.models import TrackableMixin
+from nango.db import models
 
 
-class Company(TrackableMixin, LockableMixin, models.Model):
+class Company(models.Model):
+    class Meta:
+        verbose_name_plural = "companies"
+        abstract = False
+
     name = models.CharField(max_length=100)
     notes = models.TextField()
 
     def __str__(self) -> str:
         return self.name.title()
 
-    class Meta:
-        abstract = False
 
-
-class Customer(TrackableMixin, LockableMixin, models.Model):
+class Customer(models.Model):
     name = models.CharField(max_length=100)
     notes = models.TextField()
     company = models.ForeignKey(

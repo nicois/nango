@@ -51,7 +51,7 @@ pip install nango
 
 ### Update views.py (if using generic model views)
 
-Instead of using Django's generic views, replace them with nango's. You can safely just update the `include` statements
+Instead of using Django's generic views, replace them with nango's. You can safely just update the `import` statements
 with nango. The appropriate views (e.g. UpdateView) will be modified, ensuring they use an "enhanced" form class, and the other views will also be available, unmodified.
 
 ```python
@@ -108,11 +108,16 @@ class MyForm(Form):
 
 To make a model nango-aware, it will need a mixin added to it. You can either do this by explicitly adding the mixin,
 or modifying the import of the Model base class.
+If you choose the first option, you will also need to explicitly mark this
+class as not abstract, as shown below:
 
 ```python
 from django.db import models
 from nango.db.models import TrackableMixin
 class Customer(TrackableMixin, models.Model):
+    class Meta:
+        abstract = False
+        ...
     ...
 ```
 

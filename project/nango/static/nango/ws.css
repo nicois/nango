@@ -1,3 +1,15 @@
 .nango-outdated {
   color: red;
 }
+input[data-nango-state="clean"] {
+  color: blue;
+}
+input[data-nango-state="dirty"] {
+  color: orange;
+}
+input[data-nango-state="saved"] {
+  color: green;
+}
+.nango-validation-error {
+  color: red;
+}

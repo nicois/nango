@@ -18,6 +18,9 @@ class UpdateView(edit.UpdateView):
     fields = ["name", "notes", "company"]
     prefix = "foo"
 
+    auto_clean_fields = ["name"]
+    auto_submit_fields = ["notes"]
+
     def get_form(self):
         return super().get_form()
 

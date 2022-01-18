@@ -1,15 +1,16 @@
 from django import forms
 from django.contrib import admin
 from nango import forms
-from nango.common import set_original_form_values_on_instance
+from nango.common import ENABLE_WEBSOCKET
 
 
 class AdminMixin:
     class Media:
-        js = ["nango/ws.js"]
+        if ENABLE_WEBSOCKET:
+            js = ["nango/ws.js"]
 
     def save_model(self, request, obj, form, change):
-        set_original_form_values_on_instance(form=form, instance=obj)
+        forms.set_original_form_values_on_instance(form=form, instance=obj)
         return super().save_model(request=request, obj=obj, form=form, change=change)
 
 

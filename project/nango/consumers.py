@@ -9,6 +9,7 @@ from typing import Tuple
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.apps import apps
+from django.core.exceptions import ValidationError
 
 from .common import decode_pk
 from .common import instance_ref_to_channel_group_key
@@ -47,6 +48,7 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
             if original_value != new_value:
                 message = dict(
                     message=dict(
+                        action="modify",
                         app=app,
                         model=model,
                         pk=pkey,
@@ -60,7 +62,52 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
 
     async def receive(self, text_data: bytes) -> None:
         text_data_json = json.loads(text_data)
-        for instance_ref in text_data_json["register"]:
+        action = text_data_json["action"]
+        if action == "Register":
+            await self.register(text_data_json=text_data_json)
+            return
+        if action == "Submit":
+            await self.submit(data=text_data_json)
+            return
+        if action == "Clean":
+            await self.clean(data=text_data_json)
+            return
+        assert False, f"unknown {action=}"
+
+    async def clean(self, data: Any) -> None:
+        await sync_to_async(self.clean_sync)(data=data)
+        await self.send(text_data=json.dumps(dict(action="clean", message=data)))
+
+    def clean_sync(self, data: Any) -> None:
+        """
+        Using the new value for this instance attribute,
+        make a provisional change and return the cleaned
+        version of the value to the ws client.
+
+        If validation fails, instead return the
+        validation messages.
+        """
+        dataset = data["dataset"]
+        app_label = dataset["appLabel"]
+        model_name = dataset["modelName"]
+        pkey = decode_pk(dataset["instancePk"])
+        Model = apps.get_model(app_label, model_name)
+        try:
+            try:
+                instance = Model.objects.get(pk=pkey)
+                setattr(instance, dataset["originalName"], data["currentValue"])
+                instance.clean()
+                data["cleanedValue"] = getattr(instance, dataset["originalName"])
+            except ValidationError as exception:
+                data["validationErrors"] = exception.messages
+        except Exception as exception:
+            data["error"] = str(exception)
+
+    async def submit(self, data: Any) -> None:
+        await self.send(text_data=json.dumps(dict(action="submit", message=data)))
+
+    async def register(self, text_data_json: Any) -> None:
+        for instance_ref in text_data_json["fields"]:
             app_label = instance_ref["appLabel"]
             model = instance_ref["model"]
             pkey = decode_pk(instance_ref["pk"])

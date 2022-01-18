@@ -1,4 +1,5 @@
 # Create your models here.
+from django.core.exceptions import ValidationError
 from nango.db import models
 
 
@@ -21,8 +22,14 @@ class Customer(models.Model):
         Company, null=True, default=None, on_delete=models.PROTECT
     )
 
+    def clean(self):
+        self.name = self.name.title()
+        if len(self.name) < 5:
+            raise ValidationError({"name": "Name is too short"})
+        return super().clean()
+
     def __str__(self) -> str:
-        return self.name.title()
+        return self.name
 
     class Meta:
         abstract = False

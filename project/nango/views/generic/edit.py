@@ -3,9 +3,9 @@ from types import MethodType
 from typing import Any
 
 from django.views.generic import edit
-from nango.common import patch_widgets
-from nango.common import set_original_form_values_on_instance
 from nango.db.models import TrackableMixin
+from nango.forms import patch_widgets
+from nango.forms import set_original_form_values_on_instance
 
 """
 idea: in the template, if certain fields are selected to be live-tracked,
@@ -38,6 +38,17 @@ class Mixin:
             return original_clean(*args, **kw)
 
         form.clean = MethodType(new_clean, form)
+
+        for attr in [
+            "auto_clean_fields",
+            "auto_submit_fields",
+            "auto_clean_debounce_period",
+            "auto_submit_debounce_period",
+        ]:
+            # Push this attr value from the generic
+            # view to the form
+            if attr_value := getattr(self, attr, None):
+                setattr(form, attr, attr_value)
 
         return form
 

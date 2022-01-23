@@ -38,18 +38,19 @@ function setupDebounces(ws) {
         element.dataset[`auto${action}DebouncePeriod`],
         10
       );
-      visibleInput.addEventListener(
-        "input",
-        debounce(() => {
-          const currentInput = document.getElementById(
-            element.dataset.relatedFormId
-          );
-          const currentValue = currentInput.value;
-          ws.send(
-            JSON.stringify({ action, dataset: element.dataset, currentValue })
-          );
-        }, debouncePeriodMs)
-      );
+      const debounced = debounce(() => {
+        const currentInput = document.getElementById(
+          element.dataset.relatedFormId
+        );
+        const currentValue = currentInput.value;
+        ws.send(
+          JSON.stringify({ action, dataset: element.dataset, currentValue })
+        );
+      }, debouncePeriodMs);
+      visibleInput.addEventListener("input", () => {
+        visibleInput.dataset.nangoState = "unknown";
+        debounced();
+      });
     });
   });
 }
@@ -147,7 +148,6 @@ function nangoOnUpstreamChange(data) {
    **/
   //  app, attr, model, new_value, original_value, pk
   // Find form elements referencing this attribute.
-  console.log(data);
   const elements = document.querySelectorAll(
     `input[data-app-label="${data.app}"][data-model-name="${data.model}"][data-instance-pk="${data.pk}"][data-original-name="${data.attr}"]`
   );

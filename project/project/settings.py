@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-import logging
 import mimetypes
 from pathlib import Path
 from typing import List
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "channels",
-    "debug_toolbar",
+    # "debug_toolbar",
 ]
 
 
@@ -53,7 +52,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -137,11 +136,39 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "collected_static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-logging.getLogger("django.request").setLevel("DEBUG")
-logging.getLogger("").setLevel("DEBUG")
+# logging.getLogger("django.request").setLevel("DEBUG")
+# logging.getLogger("daphne").setLevel("DEBUG")
+# logging.getLogger("").setLevel("DEBUG")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+            "formatter": "standard",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}

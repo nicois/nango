@@ -1,4 +1,5 @@
 #!/bin/bash
 set -ex
 cd project
-daphne project.asgi:application
+./manage.py collectstatic --no-input
+daphne  project.asgi:application

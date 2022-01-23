@@ -137,7 +137,7 @@ def patch_widgets(form: Form) -> None:
 
             hidden = format_html(
                 "<input "
-                + "\n\t".join(f"{attr}={value}" for attr, value in attrs.items())
+                + "\n\t".join(f"{attr}={str(value)!r}" for attr, value in attrs.items())
                 + ">"
             )
             return result + hidden

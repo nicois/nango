@@ -160,7 +160,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": "debug.log",
+            "filename": "/tmp/nango-debug.log",
             "formatter": "standard",
         },
     },

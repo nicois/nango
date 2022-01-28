@@ -20,7 +20,7 @@ from ..common import serialise_model_attr
 
 Fields = Set[str]
 
-DEFAULT_DEBOUNCE_PERIOD: float = getattr(settings, "DEFAULT_DEBOUNCE_PERIOD", 0.2)
+DEFAULT_DEBOUNCE_PERIOD: float = getattr(settings, "DEFAULT_DEBOUNCE_PERIOD", 0.001)
 
 LOGGER = logging.getLogger(__file__)
 
@@ -107,8 +107,8 @@ def patch_widgets(form: Form) -> None:
             attrs: Dict[str, str] = {
                 "data-app-label": form.instance._meta.app_label,
                 "data-model-name": form.instance._meta.model_name,
-                "data-instance-pk": encode_pk(form.instance.pk),
                 "data-original-name": _field_name,
+                "data-instance-pk": encode_pk(form.instance.pk),
                 "data-related-form-id": context["widget"]["attrs"]["id"],
                 "type": "hidden",
                 "name": "__original-" + context["widget"]["name"],
@@ -119,20 +119,28 @@ def patch_widgets(form: Form) -> None:
                 attrs["data-connection-delay"] = str(websocket_connection_delay)
 
                 if _field_name in (form.auto_submit_fields or {}):
-                    attrs["data-auto-submit-debounce-period"] = str(
-                        getattr(
-                            form, "auto_submit_debounce_period", DEFAULT_DEBOUNCE_PERIOD
+                    attrs["data-auto-submit-debounce-period-ms"] = str(
+                        int(
+                            getattr(
+                                form,
+                                "auto_submit_debounce_period",
+                                DEFAULT_DEBOUNCE_PERIOD,
+                            )
+                            * 1000
                         )
-                        * 1000
                     )
 
                 if _field_name in (form.auto_clean_fields or {}):
                     form.auto_clean_fields
-                    attrs["data-auto-clean-debounce-period"] = str(
-                        getattr(
-                            form, "auto_clean_debounce_period", DEFAULT_DEBOUNCE_PERIOD
+                    attrs["data-auto-clean-debounce-period-ms"] = str(
+                        int(
+                            getattr(
+                                form,
+                                "auto_clean_debounce_period",
+                                DEFAULT_DEBOUNCE_PERIOD,
+                            )
+                            * 1000
                         )
-                        * 1000
                     )
 
             hidden = format_html(

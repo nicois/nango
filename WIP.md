@@ -28,3 +28,15 @@
 - take "simple" model validation rules and automatically apply then client-side (take this from early horizon commit?)
 - allow widgets to have associated JS code which runs when the value is modified (or on blur?)
 - leverage the WS to pipe values back to the server and perform server-side provisional validation (rolling back the transaction afterwards), notifying in realtime (with debounce/cooldown)
+
+--
+clean vs save
+--
+if cleaning or saving, there is the risk that the returned cleaned value (which might differ from what was submitted) is
+superseded by subsequent data entry by the user.
+The solution is that, in the event that the local value is not the same as what was submitted, that the returned value is
+discarded, but the dataset state is updated.
+The premise is that what was saved/cleaned on the server was valid, even if it doesn't match exactly what the user sees. At
+least at the time the last debounce ran, the value was OK then, and that is "good enough". As soon as the user stops typing
+and the debounce fires again, it will try to submit the new value and will then be able to update the displayed value
+with what is returned from the server.

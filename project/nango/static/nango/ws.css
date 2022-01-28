@@ -1,13 +1,16 @@
 .nango-outdated {
   color: red;
 }
-input[data-nango-state="clean"] {
+[data-nango-state="clean"] {
   color: blue;
 }
-input[data-nango-state="dirty"] {
+[data-nango-state="unknown"] {
   color: orange;
 }
-input[data-nango-state="saved"] {
+[data-nango-state="dirty"] {
+  color: red;
+}
+[data-nango-state="saved"] {
   color: green;
 }
 .nango-validation-error {

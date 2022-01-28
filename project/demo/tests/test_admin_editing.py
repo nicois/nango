@@ -1,20 +1,7 @@
 from typing import Any
 from typing import Dict
 
-import pytest
 from bs4 import BeautifulSoup
-from demo.models import Company
-from demo.models import Customer
-
-
-@pytest.fixture()
-def company(db):
-    return Company.objects.create(name="Company")
-
-
-@pytest.fixture
-def freddy(db, company):
-    return Customer.objects.create(name="Freddy", notes="note", company=company)
 
 
 def parse_form(*, form) -> Dict[str, Any]:
@@ -62,7 +49,7 @@ def reloaded(instance):
 
 
 def test_normal_modify(admin_client, freddy):
-    new_note_value = "sdflkj"
+    new_note_value = "sdflkj the first"
     inputs = load_admin_form(client=admin_client, instance=freddy)
     inputs["notes"] = new_note_value
     response = save_admin_form(client=admin_client, instance=freddy, inputs=inputs)
@@ -70,7 +57,7 @@ def test_normal_modify(admin_client, freddy):
     soup = BeautifulSoup(response.content, "html.parser")
     errors = get_errors(soup)
     assert not errors, errors
-    assert reloaded(freddy).notes == new_note_value
+    assert reloaded(freddy).notes == new_note_value.title()
 
 
 def test_conflicting_modify(admin_client, freddy):
@@ -91,7 +78,7 @@ def test_conflicting_modify(admin_client, freddy):
     soup = BeautifulSoup(response.content, "html.parser")
     errors = get_errors(soup)
     assert not errors, errors
-    assert reloaded(freddy).notes == new_note_value1
+    assert reloaded(freddy).notes == new_note_value1.title()
 
     # the second one fails and is shown an error
     response = save_admin_form(client=admin_client, instance=freddy, inputs=inputs2)
@@ -100,4 +87,4 @@ def test_conflicting_modify(admin_client, freddy):
     errors = get_errors(soup)
     assert errors
     assert "object has changed" in str(errors)
-    assert reloaded(freddy).notes == new_note_value1
+    assert reloaded(freddy).notes == new_note_value1.title()

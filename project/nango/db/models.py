@@ -37,6 +37,7 @@ class TrackableMixin:
         abstract = True
 
     def save(self, *args, **kw):
+        tab_id = kw.pop("tab_id", None)
         result = super().save(*args, **kw)
         if get_channel_layer:
             channel_layer = get_channel_layer()
@@ -46,7 +47,10 @@ class TrackableMixin:
             message = dict(
                 type="saved",
                 message=dict(
-                    app=self._meta.app_label, model=self._meta.model_name, pk=self.pk
+                    tab_id=tab_id,
+                    app=self._meta.app_label,
+                    model=self._meta.model_name,
+                    pk=self.pk,
                 ),
             )
 

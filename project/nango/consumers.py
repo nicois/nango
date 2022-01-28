@@ -39,6 +39,7 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         app = message["app"]
         model = message["model"]
         pkey = message["pk"]
+        tab_id = message["tab_id"]
         fields = self.fields_for_instance[(app, model, pkey)]
         instance = await sync_to_async(self._retrieve_instance_values)(
             app=app, model=model, pk=pkey, attrs=fields
@@ -47,15 +48,16 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
             new_value = serialise_value(value=instance[attr])
             if original_value != new_value:
                 message = dict(
+                    action="modify",
                     message=dict(
-                        action="modify",
                         app=app,
                         model=model,
                         pk=pkey,
                         attr=attr,
                         original_value=original_value,
                         new_value=new_value,
-                    )
+                    ),
+                    nangoTabId=tab_id,
                 )
                 await self.send(text_data=json.dumps(message))
                 fields[attr] = new_value
@@ -75,10 +77,22 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         assert False, f"unknown {action=}"
 
     async def clean(self, data: Any) -> None:
-        await sync_to_async(self.clean_sync)(data=data)
+        await sync_to_async(self.clean_or_submit_sync)(data=data, save=False)
         await self.send(text_data=json.dumps(dict(action="clean", message=data)))
 
-    def clean_sync(self, data: Any) -> None:
+    async def submit(self, data: Any) -> None:
+        await sync_to_async(self.clean_or_submit_sync)(
+            data=data,
+            save=True,
+        )
+        await self.send(text_data=json.dumps(dict(action="submit", message=data)))
+
+    def clean_or_submit_sync(
+        self,
+        data: Any,
+        *,
+        save: bool,
+    ) -> None:
         """
         Using the new value for this instance attribute,
         make a provisional change and return the cleaned
@@ -92,38 +106,48 @@ class LiveUpdatesConsumer(AsyncWebsocketConsumer):  # type: ignore
         model_name = dataset["modelName"]
         pkey = decode_pk(dataset["instancePk"])
         Model = apps.get_model(app_label, model_name)
+        tab_id = data["nangoTabId"]
         try:
             try:
                 instance = Model.objects.get(pk=pkey)
+                instance._original_form_values[dataset["originalName"]] = data[
+                    "originalValue"
+                ].replace("\\n", "\n")
                 setattr(instance, dataset["originalName"], data["currentValue"])
                 instance.clean()
                 data["cleanedValue"] = getattr(instance, dataset["originalName"])
+                if save:
+                    instance.save(
+                        update_fields=[dataset["originalName"]], tab_id=tab_id
+                    )
             except ValidationError as exception:
                 data["validationErrors"] = exception.messages
         except Exception as exception:
             data["error"] = str(exception)
 
-    async def submit(self, data: Any) -> None:
-        await self.send(text_data=json.dumps(dict(action="submit", message=data)))
-
     async def register(self, text_data_json: Any) -> None:
+        tab_id = text_data_json["nangoTabId"]
         for instance_ref in text_data_json["fields"]:
-            app_label = instance_ref["appLabel"]
-            model = instance_ref["model"]
-            pkey = decode_pk(instance_ref["pk"])
-            group_key = instance_ref_to_channel_group_key(
-                app_label=app_label, model=model, pk=pkey
-            )
-            fields = self.fields_for_instance[(app_label, model, pkey)]
-            fields[instance_ref["attr"]] = instance_ref["value"]
-            self._my_groups.add(group_key)
+            if pkey := decode_pk(instance_ref["pk"]):
+                app_label = instance_ref["appLabel"]
+                model = instance_ref["model"]
+                group_key = instance_ref_to_channel_group_key(
+                    app_label=app_label, model=model, pk=pkey
+                )
+                fields = self.fields_for_instance[(app_label, model, pkey)]
+                fields[instance_ref["attr"]] = instance_ref["value"].replace(
+                    "\\n", "\n"
+                )
+                self._my_groups.add(group_key)
 
         for group_key in self._my_groups:
             await self.channel_layer.group_add(
                 channel=self.channel_name, group=group_key
             )
             await self.saved(
-                info=dict(message=dict(app=app_label, model=model, pk=pkey))
+                info=dict(
+                    message=dict(app=app_label, model=model, pk=pkey, tab_id=tab_id)
+                )
             )
 
     async def disconnect(self, close_code: Any) -> None:

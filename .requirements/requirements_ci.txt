@@ -1,8 +1,9 @@
 -rrequirements.txt
+beautifulsoup4
 django-stubs
 mypy
-beautifulsoup4
 pytest
+pytest-asyncio
 pytest-django
 pytest-xdist
 snoop

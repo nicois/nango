@@ -20,7 +20,7 @@ from ..common import serialise_model_attr
 
 Fields = Set[str]
 
-DEFAULT_DEBOUNCE_PERIOD: float = getattr(settings, "DEFAULT_DEBOUNCE_PERIOD", 0.1)
+DEFAULT_DEBOUNCE_PERIOD: float = getattr(settings, "DEFAULT_DEBOUNCE_PERIOD", 0.001)
 
 LOGGER = logging.getLogger(__file__)
 

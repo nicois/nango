@@ -29,7 +29,8 @@ As you can see, using the normal django tooling, the change made by the first us
 does not track the original form value, making it impossible for it to know that the data was modified between when
 the form was rendered, and when the form was submitted.
 
-## Does this matter to me?
+
+### Does this matter to me?
 
 Here's a simple checklist to help you consider if this is a problem for you.
 
@@ -42,6 +43,13 @@ if they do occur, you will have lost user data. There will be no errors, just us
 made were not saved. The original data will be irretrievable, and it will be difficult to even work out how often it is occurring.
 
 [learn more](./nango-all.md)
+
+## What do Django Channels-enabled apps get?
+
+
+
+https://user-images.githubusercontent.com/236562/153730358-d5b594c4-3f28-4e02-952d-692141ad19d2.mp4
+
 
 ## Installation
 

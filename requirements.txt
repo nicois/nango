@@ -10,7 +10,7 @@ channels-redis==3.3.1
 constantly==15.1.0
 cryptography==36.0.1
 daphne==3.0.2
-Django==4.0.1
+Django==4.0.2
 django-debug-toolbar==3.2.4
 hiredis==2.0.0
 hyperlink==21.0.0
@@ -24,7 +24,7 @@ pyOpenSSL==22.0.0
 service-identity==21.1.0
 six==1.16.0
 sqlparse==0.4.2
-Twisted==21.7.0
+Twisted==22.1.0
 txaio==21.2.1
-typing-extensions==4.0.1
+typing-extensions==4.1.0
 zope.interface==5.4.0

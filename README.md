@@ -4,17 +4,17 @@ Streamlining Django forms to provide all the wins of single-page-applications wi
 
 ## Key features
 
-Available now:
+Available to all Django deployments:
 
-- django forms no longer silently overwrite changes made in parallel by other users
+- Django forms no longer silently overwrite changes made in parallel by other users
 
-Coming soon:
+Available if Django Channels is enabled:
 
-- django forms can receive push notifications from the server (via Channels) when data used on the form changes, rather than only discovering data is out-of-date when the form is submitted
-- django forms can send provisional form data to the server, allowing server-based field validation before the form is submitted
-- django forms can save form data as it is edited, without needing a "submit" button.
+- Django forms can receive push notifications from the server (via Channels) when data used on the form changes, rather than only discovering data is out-of-date when the form is submitted
+- Django forms can send provisional form data to the server, allowing server-based field validation before the form is submitted
+- Django forms can save form data as it is edited, without needing a "submit" button.
 
-## what does this do?
+## What do all Django apps get?
 
 Out of the box, Django provides reasonable support for database-level data consistency while a request is being processed, thanks to
 transactions. However, it is let down by not providing an easy way to avoid data corruptions between requests.
@@ -40,6 +40,8 @@ Here's a simple checklist to help you consider if this is a problem for you.
 If the data you're storing is not important, maybe you can get away without caring about these "edge cases". However,
 if they do occur, you will have lost user data. There will be no errors, just users complaining that the changes they
 made were not saved. The original data will be irretrievable, and it will be difficult to even work out how often it is occurring.
+
+[learn more](./nango-all.md)
 
 ## Installation
 

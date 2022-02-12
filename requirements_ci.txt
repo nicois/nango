@@ -13,7 +13,7 @@ cheap-repr==0.5.1
 constantly==15.1.0
 cryptography==36.0.1
 daphne==3.0.2
-Django==4.0.1
+Django==4.0.2
 django-debug-toolbar==3.2.4
 django-stubs==1.9.0
 django-stubs-ext==0.3.1
@@ -36,8 +36,8 @@ pycparser==2.21
 Pygments==2.11.2
 pyOpenSSL==22.0.0
 pyparsing==3.0.7
-pytest==6.2.5
-pytest-asyncio==0.17.2
+pytest==7.0.1
+pytest-asyncio==0.18.1
 pytest-django==4.5.2
 pytest-forked==1.4.0
 pytest-xdist==2.5.0
@@ -47,10 +47,10 @@ snoop==0.4.1
 soupsieve==2.3.1
 sqlparse==0.4.2
 toml==0.10.2
-tomli==2.0.0
-Twisted==21.7.0
+tomli==2.0.1
+Twisted==22.1.0
 txaio==21.2.1
 types-pytz==2021.3.4
-types-PyYAML==6.0.3
-typing-extensions==4.0.1
+types-PyYAML==6.0.4
+typing-extensions==4.1.0
 zope.interface==5.4.0

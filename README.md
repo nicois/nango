@@ -45,11 +45,25 @@ made were not saved. The original data will be irretrievable, and it will be dif
 [learn more](./nango-all.md)
 
 ## What do Django Channels-enabled apps get?
+Here is a quick example, where a model is being simultaneous edited in two admin panels, and two UpdateViews.
+Things to note:
+- the Customer model has a clean() rule ensuring the name and comment values are at least 5 characters long and there is a vowel in each word. Additionally it with capitalise the first letter in each word.
+- the only additional changes required are enabling the auto-clean and auto-submit features in the UpdateView's definition:
+```python
+class UpdateView(edit.UpdateView):
+    model = Customer
+    fields = ["name", "notes", "company"]
+    auto_clean_fields = ["name"]
+    auto_submit_fields = ["notes"]
+    ...
+```
 
+https://user-images.githubusercontent.com/236562/153730557-a22b473a-1680-465d-a898-1a7fa72e919f.mp4
 
-
-https://user-images.githubusercontent.com/236562/153730358-d5b594c4-3f28-4e02-952d-692141ad19d2.mp4
-
+Features demonstrated above:
+- the admin panel views automatically reflect changes as they occur. If a conflict occurs (due to also changing a field's value locally), it is highlighted and cannot be successfully saved.
+- the 'name' field, which is set to auto-clean, uses CSS to provide feedback on whether the current field value is valid, according to the server. In addition, if the field is not valid, the validation errors are shown. In both the admin panels and UpdateViews, any corrections to the field (ie: capitalisation) are reflected in realtime.
+- the 'notes' field is set to auto-submit, meaning that whenever its value is changed, the change is sent via a websocket to the server, and if clean() is successful, the value is saved. CSS classes are also used to indicate the status of the field, such as failing validation, save in progress, or saved.
 
 ## Installation
 

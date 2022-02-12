@@ -27,6 +27,8 @@ mymodel = get_model('some_app', 'SomeModel')
 class Mixin:
     def get_form(self):
         form = super().get_form()
+        if not hasattr(form, "instance"):
+            return form
         if not isinstance(form.instance, TrackableMixin):
             return form
 

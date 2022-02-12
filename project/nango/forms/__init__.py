@@ -118,7 +118,7 @@ def patch_widgets(form: Form) -> None:
             if ENABLE_WEBSOCKET:
                 attrs["data-connection-delay"] = str(websocket_connection_delay)
 
-                if _field_name in (form.auto_submit_fields or {}):
+                if _field_name in (getattr(form, "auto_submit_fields", None) or {}):
                     attrs["data-auto-submit-debounce-period-ms"] = str(
                         int(
                             getattr(
@@ -130,7 +130,7 @@ def patch_widgets(form: Form) -> None:
                         )
                     )
 
-                if _field_name in (form.auto_clean_fields or {}):
+                if _field_name in (getattr(form, "auto_clean_fields", None) or {}):
                     form.auto_clean_fields
                     attrs["data-auto-clean-debounce-period-ms"] = str(
                         int(
